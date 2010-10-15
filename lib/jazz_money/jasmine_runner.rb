@@ -1,13 +1,14 @@
 module JazzMoney
 
   class JasmineRunner
-    
-    def initialize(page, jasmine_spec_files, js_includes, observer, html_fixture_dir = 'spec/javascripts/fixtures')
+
+    def initialize(page, jasmine_spec_files, js_includes, disabled_tags, observer, html_fixture_dir = 'spec/javascripts/fixtures')
       @page = page
       @observer = observer
       @js_includes = js_includes
       @jasmine_spec_files = jasmine_spec_files
       @html_fixture_dir = html_fixture_dir
+      @disabled_tags = disabled_tags
     end
 
     def start
@@ -33,6 +34,7 @@ module JazzMoney
       JS
       @page.execute_js(js)
       load_js_includes
+      setup_jasmine_env
       load_jasmine_spec_files
       start_jasmine
     end
@@ -62,10 +64,10 @@ module JazzMoney
 
     def load_jasmine
       jasmine_gemspecs = Gem.searcher.find_all('jasmine')
-      correct_jasmine_gemspec = jasmine_gemspecs.detect { |gemspec| gemspec.version.to_s == "0.11.1.0" }
+      correct_jasmine_gemspec = jasmine_gemspecs.detect { |gemspec| gemspec.version.to_s == "1.0.0" }
       jasmine_gem_path = correct_jasmine_gemspec.full_gem_path
       jasmine_js_files_path = File.join(jasmine_gem_path, "jasmine", "lib")
-      ['consolex.js', 'jasmine.js'].each do |file|
+      ['jasmine.js'].each do |file|
         @page.load(File.join(jasmine_js_files_path, file))
       end
     end
@@ -82,13 +84,23 @@ module JazzMoney
       end
     end
 
-    def start_jasmine
+    def setup_jasmine_env
       @page.execute_js(<<-JS)
         var jasmineEnv = jasmine.getEnv();
         var jsApiReporter = new jasmine.JsApiReporter();
         jasmineEnv.addReporter(jsApiReporter);
-        jasmineEnv.execute();
+        if (typeof(jasmineEnv.disableTagged) === 'function') {
+          jasmineEnv.disableTagged(#{disabled_tags_as_json});
+        }
       JS
+    end
+
+    def start_jasmine
+      @page.execute_js('jasmineEnv.execute();')
+    end
+
+    def disabled_tags_as_json
+      '[' + @disabled_tags.map { |tag| "'#{tag}'" }.join(', ') + ']'
     end
   end
 end
