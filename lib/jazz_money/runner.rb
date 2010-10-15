@@ -3,8 +3,8 @@ module JazzMoney
   # TODO: rename. easy to confuse with JasmineRunner. or rename JasmineRunner.
   class Runner
 
-    def self.from_jasmine_config
-      jasmine_config = Jasmine::Config.new
+    def self.from_jasmine_config(overrides = nil)
+      jasmine_config = Jasmine::Config.new(overrides)
 
       unless jasmine_config.stylesheets.empty?
         warn "WARNING: JazzMoney does not support stylesheets!"
@@ -13,7 +13,7 @@ module JazzMoney
       spec_files = jasmine_config.spec_files.map { |path| File.join(jasmine_config.spec_dir, path) }
       helper_files = jasmine_config.helpers.map { |path| File.join(jasmine_config.spec_dir, path) }
       src_files = jasmine_config.src_files.map { |path| File.join(jasmine_config.src_dir, path) }
-      
+
       self.new(src_files, helper_files + spec_files)
     end
 
