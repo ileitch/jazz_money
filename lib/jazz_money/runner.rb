@@ -19,7 +19,7 @@ module JazzMoney
       self.new(src_files, helper_files + spec_files, disabled_tags)
     end
 
-    def initialize(js_includes, jasmine_spec_files)
+    def initialize(js_includes, jasmine_spec_files, disabled_tags)
       @page = Harmony::Page.new
       @jasmine_runner = JasmineRunner.new(@page, jasmine_spec_files, js_includes, disabled_tags, self)
       @js_includes = js_includes
