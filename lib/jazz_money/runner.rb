@@ -14,12 +14,14 @@ module JazzMoney
       helper_files = jasmine_config.helpers.map { |path| File.join(jasmine_config.spec_dir, path) }
       src_files = jasmine_config.src_files.map { |path| File.join(jasmine_config.src_dir, path) }
 
-      self.new(src_files, helper_files + spec_files)
+      disabled_tags = jasmine_config.respond_to?(:disabled_tags) ? jasmine_config.disabled_tags : []
+
+      self.new(src_files, helper_files + spec_files, disabled_tags)
     end
 
     def initialize(js_includes, jasmine_spec_files)
       @page = Harmony::Page.new
-      @jasmine_runner = JasmineRunner.new(@page, jasmine_spec_files, js_includes, self)
+      @jasmine_runner = JasmineRunner.new(@page, jasmine_spec_files, js_includes, disabled_tags, self)
       @js_includes = js_includes
       @jasmine_spec_files = jasmine_spec_files
     end
